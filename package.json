@@ -1,0 +1,44 @@
+{
+    "name": "edge-proxy",
+    "version": "0.0.1",
+    "description": "Cloudflare proxy, providing a/b/n testing, canary releasing, gatekeeping, and SEO a/b/n testing. Implemented as a Cloudflare worker script.",
+    "main": "index.js",
+    "scripts": {
+        "test": "jest --watch"
+    },
+    "author": "Digital Optimization Group LLC",
+    "license": "MIT",
+    "keywords": [
+        "serverless",
+        "proxy",
+        "a/b testing",
+        "seo a/b testing",
+        "gatekeeping",
+        "canary release",
+        "traffic shaping",
+        "Cloudflare",
+        "aws"
+    ],
+    "devDependencies": {
+        "@babel/core": "^7.2.0",
+        "@babel/preset-env": "^7.2.0",
+        "babel-core": "^7.0.0-bridge.0",
+        "babel-jest": "^23.6.0",
+        "babel-polyfill": "^6.26.0",
+        "jest": "^23.6.0",
+        "regenerator-runtime": "^0.13.1"
+    },
+    "dependencies": {
+        "bignumber.js": "^8.0.1",
+        "cookie": "^0.3.1",
+        "querystring": "^0.2.0",
+        "service-worker-mock": "^1.10.2",
+        "sha1": "^1.1.1",
+        "uuid": "^3.3.2"
+    },
+    "jest": {
+        "setupFiles": [
+            "<rootDir>/jest.init.js"
+        ]
+    }
+}
