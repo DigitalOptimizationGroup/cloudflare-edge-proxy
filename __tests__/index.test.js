@@ -5,7 +5,7 @@ const makeFetchMock = require("service-worker-mock/fetch");
 
 jest.mock("uuid/v4", () => jest.fn(() => "mock-uuid"));
 
-describe("Service worker", () => {
+describe("Proxy", () => {
     beforeEach(() => {
         Object.assign(global, makeServiceWorkerEnv(), makeFetchMock());
         jest.resetModules();
@@ -18,7 +18,7 @@ describe("Service worker", () => {
         expect(Object.keys(self.listeners)).toEqual(["fetch"]);
     });
 
-    it("should respond with proxied request for a/b test", async () => {
+    it("should pass request-id to origin", async () => {
         // set up config
         const proxy = cloudFlareEdgeProxy({
             abtest: true,

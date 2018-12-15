@@ -3,13 +3,13 @@ import cloudFlareEdgeProxy from "../src";
 const makeServiceWorkerEnv = require("service-worker-mock");
 const makeFetchMock = require("service-worker-mock/fetch");
 
-describe("Service worker", () => {
+describe("Default Backend", () => {
     beforeEach(() => {
         Object.assign(global, makeServiceWorkerEnv(), makeFetchMock());
         jest.resetModules();
     });
 
-    it("should equally (approximately) balance assignment", async () => {
+    it("should sent traffic to default backend", async () => {
         // set up config
         const proxy = cloudFlareEdgeProxy({
             defaultBackend: "https://default-backend.com"

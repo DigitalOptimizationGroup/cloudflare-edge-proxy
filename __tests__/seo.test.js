@@ -3,7 +3,7 @@ import cloudFlareEdgeProxy from "../src";
 const makeServiceWorkerEnv = require("service-worker-mock");
 const makeFetchMock = require("service-worker-mock/fetch");
 
-describe("Service worker", () => {
+describe("Search Engine Optimization - A/B Testing", () => {
     beforeEach(() => {
         Object.assign(global, makeServiceWorkerEnv(), makeFetchMock());
         jest.resetModules();

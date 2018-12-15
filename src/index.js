@@ -15,29 +15,32 @@ export default config => async event => {
     // create a new requestid for every request
     const requestId = uuid();
     // use the request Id for userId if it's the first request
-    // backend is responsible for setting the _vq cookie (or maybe we can set it here?)
+    // backend is responsible for setting the _vq cookie
     const _vq = cookies["_vq"] || requestId;
 
     const newHeaders = new Headers(request.headers);
     newHeaders.append("request-id", requestId);
 
     if (
-        pathname === "echo" &&
+        pathname === "/echo" &&
         config.ECHO_TOKEN &&
         params.echotoken === config.ECHO_TOKEN
     ) {
         return new Response(
-            JSON.stringify({
-                cookies,
-                params,
-                pathname,
-                headers: [...newHeaders]
-            }),
+            `<pre>${JSON.stringify(
+                {
+                    cookies,
+                    params,
+                    pathname,
+                    headers: [...newHeaders]
+                },
+                null,
+                4
+            )}</pre>`,
             {
                 status: 200,
                 headers: new Headers({
-                    "Content-Type": "text/html",
-                    "Access-Control-Allow-Origin": "*"
+                    "Content-Type": "text/html"
                 })
             }
         );
@@ -46,8 +49,6 @@ export default config => async event => {
         (config.JWT_SECRET_KEY && cookies.devtoken)
     ) {
         // gatekeeping
-        // maybe we simplify and just use or set a single token and then differentiate within the token
-        // maybe inject something to notify user they are on dev and maybe set cookie?
         try {
             // attempt to validate the jwt
             const data = jwttoken.verify(
@@ -60,9 +61,8 @@ export default config => async event => {
                     headers: newHeaders
                 })
             );
-            // if the cookie is not set, then set it (and redirect?)
-            // if (!cookies.devtoken) {}
         } catch (e) {
+            // invalid JWT, return default backend
             return fetch(
                 new Request(`${config.defaultBackend}${pathname}${search}`, {
                     ...request,
@@ -70,66 +70,63 @@ export default config => async event => {
                 })
             );
         }
+    } else if (config.abtest) {
+        // run a/b/n test
+        const selectedIndex = uniformIndex(
+            `${config.salt}.${_vq}`,
+            config.origins.length
+        );
+
+        return fetch(
+            new Request(
+                `${config.origins[selectedIndex].url}${pathname}${search}`,
+                {
+                    ...request,
+                    headers: newHeaders
+                }
+            )
+        );
+    } else if (config.canary) {
+        // choose canary or default
+        const canaryBoolean = showCanary(
+            `${config.salt}.${_vq}`,
+            config.weight
+        );
+
+        return fetch(
+            new Request(
+                `${
+                    canaryBoolean ? config.canaryBackend : config.defaultBackend
+                }${pathname}${search}`,
+                {
+                    ...request,
+                    headers: newHeaders
+                }
+            )
+        );
+    } else if (config.SEOTest) {
+        // run a/b/n test based on request uri
+        const selectedIndex = uniformIndex(
+            `${config.salt}.${pathname}`,
+            config.origins.length
+        );
+
+        return fetch(
+            new Request(
+                `${config.origins[selectedIndex].url}${pathname}${search}`,
+                {
+                    ...request,
+                    headers: newHeaders
+                }
+            )
+        );
     } else {
-        if (config.abtest) {
-            // run a/b/n test
-            const selectedIndex = uniformIndex(
-                `${config.salt}.${_vq}`,
-                config.origins.length
-            );
-
-            return fetch(
-                new Request(
-                    `${config.origins[selectedIndex].url}${pathname}${search}`,
-                    {
-                        ...request,
-                        headers: newHeaders
-                    }
-                )
-            );
-        } else if (config.canary) {
-            // choose canary or default
-            const canaryBoolean = showCanary(
-                `${config.salt}.${_vq}`,
-                config.weight
-            );
-
-            return fetch(
-                new Request(
-                    `${
-                        canaryBoolean
-                            ? config.canaryBackend
-                            : config.defaultBackend
-                    }${pathname}${search}`,
-                    {
-                        ...request,
-                        headers: newHeaders
-                    }
-                )
-            );
-        } else if (config.SEOTest) {
-            // run a/b/n test based on request uri
-            const selectedIndex = uniformIndex(
-                `${config.salt}.${pathname}`,
-                config.origins.length
-            );
-            return fetch(
-                new Request(
-                    `${config.origins[selectedIndex].url}${pathname}${search}`,
-                    {
-                        ...request,
-                        headers: newHeaders
-                    }
-                )
-            );
-        } else {
-            // default backend
-            return fetch(
-                new Request(`${config.defaultBackend}${pathname}${search}`, {
-                    ...request,
-                    headers: newHeaders
-                })
-            );
-        }
+        // default backend
+        return fetch(
+            new Request(`${config.defaultBackend}${pathname}${search}`, {
+                ...request,
+                headers: newHeaders
+            })
+        );
     }
 };
