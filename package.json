@@ -3,9 +3,10 @@
     "version": "1.0.0-alpha",
     "description":
         "Cloudflare proxy, providing a/b/n testing, canary releasing, gatekeeping, and SEO a/b/n testing. Implemented as a Cloudflare worker script.",
-    "main": "index.js",
+    "main": "dist/index.js",
     "scripts": {
-        "test": "jest --watch --verbose"
+        "test": "jest --watch --verbose",
+        "build": "babel src -d dist --verbose"
     },
     "author": "Digital Optimization Group LLC",
     "license": "MIT",
@@ -21,20 +22,21 @@
         "aws"
     ],
     "devDependencies": {
+        "@babel/cli": "^7.2.0",
         "@babel/core": "^7.2.0",
         "@babel/preset-env": "^7.2.0",
         "babel-core": "^7.0.0-bridge.0",
         "babel-jest": "^23.6.0",
         "babel-polyfill": "^6.26.0",
         "jest": "^23.6.0",
-        "regenerator-runtime": "^0.13.1"
+        "regenerator-runtime": "^0.13.1",
+        "service-worker-mock": "^1.10.2"
     },
     "dependencies": {
         "bignumber.js": "^8.0.1",
         "cookie": "^0.3.1",
         "jsonwebtoken": "^8.4.0",
         "querystring": "^0.2.0",
-        "service-worker-mock": "^1.10.2",
         "sha1": "^1.1.1",
         "uuid": "^3.3.2"
     },
