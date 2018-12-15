@@ -18,9 +18,27 @@ describe("Service worker", () => {
 
     it("should respond with proxied request", async () => {
         // set up config
-        const proxy = cloudFlareEdgeProxy({});
+        const proxy = cloudFlareEdgeProxy({
+            abtest: true,
+            origins: [{ url: "https://example.com" }],
+            salt: "test-abc-123"
+        });
 
-        global.fetch = () => Promise.resolve({});
+        const headers = new Headers({});
+        headers.append("Content-Type", "text/html");
+
+        global.fetch = () =>
+            Promise.resolve({
+                body: { parts: ["Hello World"], type: "" },
+                bodyUsed: false,
+                headers,
+                ok: true,
+                redirected: false,
+                status: 200,
+                statusText: "OK",
+                type: "basic",
+                url: "http://example.com/asset"
+            });
 
         addEventListener("fetch", event => {
             event.respondWith(proxy(event));
@@ -35,7 +53,7 @@ describe("Service worker", () => {
         }).toEqual({
             body: { parts: ["Hello World"], type: "" },
             bodyUsed: false,
-            headers: [["Content-Type", "text/plain"]],
+            headers: [["Content-Type", "text/html"]],
             ok: true,
             redirected: false,
             status: 200,
