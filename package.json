@@ -20,6 +20,11 @@
         "traffic shaping",
         "cloudflare"
     ],
+    "repository": {
+        "type": "git",
+        "url":
+            "https://github.com/DigitalOptimizationGroup/cloudflare-edge-proxy.git"
+    },
     "devDependencies": {
         "@babel/cli": "^7.2.0",
         "@babel/core": "^7.2.0",
