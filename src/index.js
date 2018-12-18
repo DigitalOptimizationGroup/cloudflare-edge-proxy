@@ -55,15 +55,38 @@ export default config => async event => {
                 params.devtoken || cookies.devtoken,
                 config.JWT_SECRET_KEY
             );
-            return fetch(
+            const response = await fetch(
                 new Request(`${data.url}${pathname}${search}`, {
                     ...request,
                     headers: newHeaders
                 })
             );
+
+            if (config.setGatekeepingCookie) {
+                // set the token in a cookie that expires in 1 day
+                const newHeaders = new Headers(response.headers);
+                newHeaders.append(
+                    "Set-Cookie",
+                    cookie.serialize(
+                        "devtoken",
+                        params.devtoken || cookies.devtoken,
+                        {
+                            httpOnly: true,
+                            maxAge: 60 * 60 * 24 // 1 day
+                        }
+                    )
+                );
+                return new Response(response.body, {
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: newHeaders
+                });
+            } else {
+                return response;
+            }
         } catch (e) {
             // invalid JWT, return default backend
-            return fetch(
+            return await fetch(
                 new Request(`${config.defaultBackend}${pathname}${search}`, {
                     ...request,
                     headers: newHeaders
@@ -77,7 +100,7 @@ export default config => async event => {
             config.origins.length
         );
 
-        return fetch(
+        const response = await fetch(
             new Request(
                 `${config.origins[selectedIndex].url}${pathname}${search}`,
                 {
@@ -86,6 +109,24 @@ export default config => async event => {
                 }
             )
         );
+
+        if (config.setCookie) {
+            const newHeaders = new Headers(response.headers);
+            newHeaders.append(
+                "Set-Cookie",
+                cookie.serialize("_vq", _vq, {
+                    httpOnly: true,
+                    maxAge: 60 * 60 * 24 * 365 // 1 year
+                })
+            );
+            return new Response(response.body, {
+                status: response.status,
+                statusText: response.statusText,
+                headers: newHeaders
+            });
+        } else {
+            return response;
+        }
     } else if (config.canary) {
         // choose canary or default
         const canaryBoolean = showCanary(
@@ -93,7 +134,7 @@ export default config => async event => {
             config.weight
         );
 
-        return fetch(
+        const response = await fetch(
             new Request(
                 `${
                     canaryBoolean ? config.canaryBackend : config.defaultBackend
@@ -104,6 +145,23 @@ export default config => async event => {
                 }
             )
         );
+        if (config.setCookie) {
+            const newHeaders = new Headers(response.headers);
+            newHeaders.append(
+                "Set-Cookie",
+                cookie.serialize("_vq", _vq, {
+                    httpOnly: true,
+                    maxAge: 60 * 60 * 24 * 365 // 1 year
+                })
+            );
+            return new Response(response.body, {
+                status: response.status,
+                statusText: response.statusText,
+                headers: newHeaders
+            });
+        } else {
+            return response;
+        }
     } else if (config.SEOTest) {
         // run a/b/n test based on request uri
         const selectedIndex = uniformIndex(

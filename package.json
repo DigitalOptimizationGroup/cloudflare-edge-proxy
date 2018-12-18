@@ -1,6 +1,6 @@
 {
     "name": "cloudflare-edge-proxy",
-    "version": "1.0.0-alpha",
+    "version": "1.0.0-alpha.0",
     "description":
         "Cloudflare proxy, providing a/b/n testing, canary releasing, gatekeeping, and SEO a/b/n testing. Implemented as a Cloudflare worker script.",
     "main": "dist/index.js",

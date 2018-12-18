@@ -64,4 +64,82 @@ describe("A/B/N Testing", () => {
             ).toBe(3);
         });
     });
+
+    it("should set cookie if config.setCookie === true", async () => {
+        // set up config
+        const proxy = cloudFlareEdgeProxy({
+            abtest: true,
+            origins: [
+                { url: "https://a.com" },
+                { url: "https://b.com" },
+                { url: "https://c.com" }
+            ],
+            salt: "test-abc-123",
+            setCookie: true
+        });
+
+        const headers = new Headers({});
+        headers.append("Content-Type", "text/html");
+
+        var _vq;
+        global.fetch = jest.fn(e => {
+            _vq = e.headers._map.get("request-id");
+            return Promise.resolve({
+                body: "Backend",
+                headers,
+                status: 200,
+                statusText: "OK"
+            });
+        });
+
+        addEventListener("fetch", event => {
+            event.respondWith(proxy(event));
+        });
+
+        const request = new Request(`/test`);
+        const result = await self.trigger("fetch", request);
+
+        expect([...result.headers._map]).toEqual([
+            ["Content-Type", "text/html"],
+            ["Set-Cookie", `_vq=${_vq}; Max-Age=31536000; HttpOnly`]
+        ]);
+    });
+
+    it("should NOT set cookie if config.setCookie is not set", async () => {
+        // set up config
+        const proxy = cloudFlareEdgeProxy({
+            abtest: true,
+            origins: [
+                { url: "https://a.com" },
+                { url: "https://b.com" },
+                { url: "https://c.com" }
+            ],
+            salt: "test-abc-123"
+        });
+
+        const headers = new Headers({});
+        headers.append("Content-Type", "text/html");
+
+        var _vq;
+        global.fetch = jest.fn(e => {
+            _vq = e.headers._map.get("request-id");
+            return Promise.resolve({
+                body: "Backend",
+                headers,
+                status: 200,
+                statusText: "OK"
+            });
+        });
+
+        addEventListener("fetch", event => {
+            event.respondWith(proxy(event));
+        });
+
+        const request = new Request(`/test`);
+        const result = await self.trigger("fetch", request);
+
+        expect([...result.headers._map]).toEqual([
+            ["Content-Type", "text/html"]
+        ]);
+    });
 });

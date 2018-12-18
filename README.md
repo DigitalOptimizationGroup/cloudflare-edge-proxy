@@ -17,7 +17,7 @@ Deploy as a Cloudflare worker function: https://developers.cloudflare.com/worker
 
 #### A/B/N Testing
 
-All assignments are done deterministically, by hashing a salt and visitor Id. On every visit the proxy creates a unique request id (using `uuid/v4`) and forwards this to the origin as a `request-id` header. On first visits the proxy will use this id as the assignment id. To assure consistent hashing your application MUST set a `_vq` cookie with this value. On the first request the value of this cookie should be set from the `request-id` header and on subsequent visits it should come from the `_vq` cookie (not from the request-id header). For example, in an `express` app, that might be done as follows:
+All assignments are done deterministically, by hashing a salt and visitor Id. On every visit the proxy creates a unique request id (using `uuid/v4`) and forwards this to the origin as a `request-id` header. On first visits the proxy will use this id as the assignment id. To assure consistent hashing this MUST be set as a `_vq` cookie. On the first request the value of this cookie should be set from the `request-id` header and on subsequent visits it should come from the `_vq` cookie (not from the request-id header). For example, in an `express` app, that might be done as follows:
 
 ```js
 // set or reset the visitor ID cookie
@@ -25,6 +25,8 @@ res.cookie("_vq", req.cookies["_vq"] || req.headers["request-id"], {
     maxAge: 3600 * 1000 * 24 * 365
 });
 ```
+
+You can optionally have the proxy setup this cookie for you by passing an additional config param: `{setCookie: true}`
 
 The worker script:
 
@@ -39,7 +41,8 @@ const config = {
         { url: "https://b.com" },
         { url: "https://c.com" }
     ],
-    salt: "test-abc-123"
+    salt: "test-abc-123",
+    setCookie: true // default is false, if true proxy will set _vq cookie
 };
 
 const proxy = cloudflareEdgeProxy(config);
@@ -61,7 +64,8 @@ const config = {
     weight: 50, // 0-100
     canaryBackend: "https://canary-backend.com",
     defaultBackend: "https://default-backend.com",
-    salt: "canary-abc-123"
+    salt: "canary-abc-123",
+    setCookie: true // default is false, if true proxy will set _vq cookie
 };
 
 const proxy = cloudflareEdgeProxy(config);
@@ -79,7 +83,8 @@ To enable gatekeeping, you must pass a `JWT_SECRET_KEY` with the config.
 import cloudflareEdgeProxy from "cloudflare-edge-proxy";
 
 const config = {
-    JWT_SECRET_KEY: process.env["JWT_SECRET_KEY"]
+    JWT_SECRET_KEY: process.env["JWT_SECRET_KEY"],
+    setGatekeepingCookie: true // default is false, if true will set a 1 day cookie
     /* ... */
 };
 
