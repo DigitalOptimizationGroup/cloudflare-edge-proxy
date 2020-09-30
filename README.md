@@ -1,4 +1,4 @@
-### Cloudflare Edge Proxy
+### Cloudflare Edge Proxy (Introduction)
 
 A Cloudflare worker script used to enable a/b testing, canary releasing, gatekeeping, and SEO a/b/n testing.
 
@@ -9,7 +9,7 @@ A Cloudflare worker script used to enable a/b testing, canary releasing, gatekee
 -   Dynamic Gatekeeping
 -   SEO A/B testing
 
-### Usage
+### Uses
 
 `npm install --save cloudflare-edge-proxy`
 
@@ -77,7 +77,7 @@ addEventListener("fetch", event => {
 
 #### Gatekeeping
 
-To enable gatekeeping, you must pass a `JWT_SECRET_KEY` with the config.
+To enable gatekeeping, you must pass a `JWT_SECRET_KEY` with the configuration.
 
 ```js
 import cloudflareEdgeProxy from "cloudflare-edge-proxy";
