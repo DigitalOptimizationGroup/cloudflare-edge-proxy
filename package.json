@@ -32,7 +32,7 @@
         "babel-core": "^7.0.0-bridge.0",
         "babel-jest": "^23.6.0",
         "babel-polyfill": "^6.26.0",
-        "jest": "^23.6.0",
+        "jest": "^29.3.1",
         "regenerator-runtime": "^0.13.1",
         "service-worker-mock": "^1.10.2"
     },
